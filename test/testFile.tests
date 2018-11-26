@@ -1,0 +1,46 @@
+#! script:meta.js
+
+#! extra: param
+## so meta
+
+# minimal
+'[]' ''
+
+# just throw an exception
+'[{ "expected": "!",
+    "inputs": [ ],
+    "line": 1 }]' '!'
+
+# whitespace and comments
+'[{ "expected": "1",
+    "inputs": [ "foo", "bar" ],
+    "line": 4 }]' '# nope
+
+      #indent
+1 foo bar
+'
+
+# escape quotes
+'[{ "expected": "foo\\"",
+    "inputs": [ "bar\'", "bq`char" ],
+    "line": 1 }]' "'foo\"' \"bar'\" `bq\\`char`"
+
+# escape backquotes
+`[{ "expected": "foo\\"",
+    "inputs": [ "bar'", "bq\`char" ],
+    "line": 1 }]` `'foo"' "bar'" \`bq\\\`char\``
+
+# quoted chars
+`[{ "expected": "\\r\\n\\t",
+    "inputs": [ ],
+    "line": 1 }]` `"\\r\\n\\t"`
+
+# quotes in words
+`[{ "expected": "\\r",
+    "inputs": [ ],
+    "line": 1 }]` `\\r`
+
+# hex
+`[{ "expected": "0xBuffer [af]",
+    "inputs": [ ],
+    "line": 1 }]` `0xaf`
