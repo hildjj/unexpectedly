@@ -1,0 +1,8 @@
+#! inline : `(() => {
+  const fs = require('fs')
+  return a => __expected
+})()`
+#! bah : boo
+
+bbb
+""

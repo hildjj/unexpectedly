@@ -3,14 +3,25 @@
     tail.unshift(head)
     return tail
   }
+  function hexToArray (s) {
+    const res = Uint8ClampedArray.from(
+      { length: s.length / 2 },
+      (buf, off) => {
+        const sof = off * 2
+        return parseInt(s.slice(sof, sof + 2), 16)
+      })
+    return res
+  }
 }
 
 start
-  = head:(WS h:line { return h }) tail:([ \t]* EOL l:line {return l})* {
+  = head:(WS h:line? _ { return h }) tail:(EOL WS l:line _ {return l})* {
     const all = list(head, tail)
     const vars = all
       .filter(t => t && t.hasOwnProperty('name'))
-      .reduce((last, {name, value}) => {last[name] = value; return last}, {})
+      .reduce((last, {name, ...rest}) => {
+        last[name] = rest; return last
+      }, {})
     return {
       tests: all.filter(t => t && t.hasOwnProperty('expected')),
       vars
@@ -20,13 +31,19 @@ start
 line
   = var
   / comment
-  / expected:results inputs:(LWS inp:chunk { return inp})* comment? {
-    return { expected, inputs, line: location().start.line }
-  }
-  / WS
+  / test
+  / '' // hack
 
 var
-  = '#!' _ name:chunk _ ':' _ value:chunk _ { return {name, value} }
+  = '#!' _ name:chunk _ ':' _ value:(c:chunk { return { value: c, line: location().start.line, column: location().start.column}}) _ {
+    value.name = name;
+    return value;
+  }
+
+test
+  = expected:results inputs:(LWS inp:chunk { return inp})* comment? {
+    return { expected, inputs, line: location().start.line }
+  }
 
 results
   = "!" { return options.EXCEPTION || "!" }
@@ -59,7 +76,7 @@ bqchar "characters that go inside back quotes, including escaped bquotes"
 
 // TODO: replace with something portable
 hex
-  = '0x' hx:$[a-fA-F0-9]+ { return Buffer.from(hx, 'hex') }
+  = '0x' hx:$[a-fA-F0-9]+ { return hexToArray(hx) }
 
 word
   = chars:wchar+ { return chars.join('') }
