@@ -7,7 +7,8 @@
     "test": "bin/unexpectedly test",
     "pretest": "npm run grammar",
     "grammar": "pegjs -o testFile.peg.js testFile.pegjs",
-    "lint": "eslint *.js test/*.js bin/*"
+    "lint": "eslint *.js test/*.js bin/*",
+    "release": "npm version patch && git push --follow-tags && npm publish"
   },
   "bin": {
     "unexpectedly": "bin/unexpectedly"
