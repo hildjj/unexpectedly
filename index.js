@@ -44,7 +44,7 @@ function coerce (actual, expected) {
  * @returns Promise fulfills on success
  */
 async function suite (target = '.', defaultScript = '../$1.js') {
-  let dir = target
+  let dir = path.resolve(target)
   let files = [target]
 
   const stats = await fsp.stat(target)
