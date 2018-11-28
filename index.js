@@ -7,7 +7,7 @@ const path = require('path')
 const Mocha = require('mocha') // TODO: just use one of the reporters
 const parser = require('./testFile.peg')
 const Runner = require('./runner')
-const { mapObj, hexlify } = require('./utils')
+const { mapObj } = require('./utils')
 
 const EXCEPTION = Symbol('EXCEPTION')
 
