@@ -12,7 +12,15 @@
   "bin": {
     "unexpectedly": "bin/unexpectedly"
   },
-  "keywords": ["test", "case", "testcase", "actual", "expected", "mocha", "harness"],
+  "keywords": [
+    "test",
+    "case",
+    "testcase",
+    "actual",
+    "expected",
+    "mocha",
+    "harness"
+  ],
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "license": "MPL-2.0",
   "devDependencies": {
