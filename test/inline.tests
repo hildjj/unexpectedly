@@ -1,6 +1,6 @@
 #! inline : `(() => {
   const fs = require('fs')
-  return a => __expected
+  return async () => __expected
 })()`
 #! bah : boo
 

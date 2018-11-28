@@ -145,11 +145,8 @@ function peg$parse(input, options) {
       peg$c1 = function(head, l) {return l},
       peg$c2 = function(head, tail) {
           const all = list(head, tail)
-          const vars = all
-            .filter(t => t && t.hasOwnProperty('name'))
-            .reduce((last, {name, ...rest}) => {
-              last[name] = rest; return last
-            }, {})
+          const vars = mapObj(all.filter(t => t && t.hasOwnProperty('name')),
+            ({name, ...rest}) => [name, rest])
           return {
             tests: all.filter(t => t && t.hasOwnProperty('expected')),
             vars
@@ -201,7 +198,7 @@ function peg$parse(input, options) {
       peg$c41 = peg$literalExpectation("0x", false),
       peg$c42 = /^[a-fA-F0-9]/,
       peg$c43 = peg$classExpectation([["a", "f"], ["A", "F"], ["0", "9"]], false, false),
-      peg$c44 = function(hx) { return hexToArray(hx) },
+      peg$c44 = function(hx) { return '0x' + hx.toLowerCase(hx) },
       peg$c45 = function(chars) { return chars.join('') },
       peg$c46 = peg$otherExpectation("words can contain quoted bits"),
       peg$c47 = /^[^ #:'"\t\r\n]/,
@@ -1448,18 +1445,10 @@ function peg$parse(input, options) {
   }
 
 
+    const { mapObj } = require('./utils')
     function list (head, tail) {
       tail.unshift(head)
       return tail
-    }
-    function hexToArray (s) {
-      const res = Uint8ClampedArray.from(
-        { length: s.length / 2 },
-        (buf, off) => {
-          const sof = off * 2
-          return parseInt(s.slice(sof, sof + 2), 16)
-        })
-      return res
     }
 
 

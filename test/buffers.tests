@@ -1,0 +1,13 @@
+#! inline: `
+const {unhexlify} = require('../utils')
+module.exports = (typ) => {
+  switch (typ) {
+    case 'Buffer':
+      return Buffer.from(__expected.slice(2), 'hex')
+  }
+  throw new Exception('Unknown buffer type')
+}`
+
+0xAF Buffer
+
+# TODO: add other TypedArray examples when they work

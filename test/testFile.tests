@@ -41,6 +41,6 @@
     "line": 1 }]` `\\r`
 
 # hex
-`[{ "expected": "0xBuffer [af]",
+`[{ "expected": "0xaf",
     "inputs": [ ],
     "line": 1 }]` `0xaf`

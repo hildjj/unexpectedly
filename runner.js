@@ -26,6 +26,11 @@ class VMScriptLines extends vm2.VMScript {
   }
 }
 
+/**
+ * Fancy "eval"
+ *
+ * @class Runner
+ */
 class Runner {
   constructor ({
     filename = null,
@@ -58,9 +63,15 @@ class Runner {
       },
       sandbox: Object.assign({}, this.sandbox, extra)
     })
-    const f = nvm.run(this.script, this.filename)
+    let f = nvm.run(this.script, this.filename)
+    if (!f) {
+      throw new Error('Nothing exported')
+    }
     if (typeof f !== 'function') {
-      throw new Error('Must export function')
+      f = f.test
+      if (typeof f !== 'function') {
+        throw new Error('Must export function or {test}')
+      }
     }
     return f.apply(null, params)
   }

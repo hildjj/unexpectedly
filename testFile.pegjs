@@ -1,27 +1,16 @@
 {
+  const { mapObj } = require('./utils')
   function list (head, tail) {
     tail.unshift(head)
     return tail
-  }
-  function hexToArray (s) {
-    const res = Uint8ClampedArray.from(
-      { length: s.length / 2 },
-      (buf, off) => {
-        const sof = off * 2
-        return parseInt(s.slice(sof, sof + 2), 16)
-      })
-    return res
   }
 }
 
 start
   = head:(WS h:line? _ { return h }) tail:(EOL WS l:line _ {return l})* {
     const all = list(head, tail)
-    const vars = all
-      .filter(t => t && t.hasOwnProperty('name'))
-      .reduce((last, {name, ...rest}) => {
-        last[name] = rest; return last
-      }, {})
+    const vars = mapObj(all.filter(t => t && t.hasOwnProperty('name')),
+      ({name, ...rest}) => [name, rest])
     return {
       tests: all.filter(t => t && t.hasOwnProperty('expected')),
       vars
@@ -74,9 +63,8 @@ bqchar "characters that go inside back quotes, including escaped bquotes"
   / qchar
   / $[^\\`]+
 
-// TODO: replace with something portable
 hex
-  = '0x' hx:$[a-fA-F0-9]+ { return hexToArray(hx) }
+  = '0x' hx:$[a-fA-F0-9]+ { return '0x' + hx.toLowerCase(hx) }
 
 word
   = chars:wchar+ { return chars.join('') }
