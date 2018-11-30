@@ -45,7 +45,7 @@ function coerce (actual, expected) {
  */
 async function suite (target = '.', defaultScript = '../$1.js') {
   let dir = path.resolve(target)
-  let files = [target]
+  let files = [dir]
 
   const stats = await fsp.stat(target)
   if (stats.isDirectory()) {
