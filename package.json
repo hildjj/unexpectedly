@@ -39,5 +39,9 @@
   "dependencies": {
     "mocha": "^5.2.0",
     "vm2": "^3.6.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/hildjj/unexpectedly.git"
   }
 }
