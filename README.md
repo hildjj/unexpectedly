@@ -14,8 +14,8 @@ npm install -g unexpectedly
 unexpectedly [file|directory] [jsPattern]
   file: a file that contains tests
   directory (default: "."): a directory containing ".tests" files
-  jsPattern (default: "../$1.js"): find the JS file relative to the .tests
-    file, replacing $1 with the basename of the test file
+  jsPattern (default: "../$1.js"): find the JS file relative to
+  the .tests file, replacing $1 with the basename of the test file
 ```
 
 ## Example
@@ -43,9 +43,10 @@ suite(directoryOrFile, jsPattern).catch(console.error)
 
 ## Test language
 
-One test per line.  Expected results, followed by parameters, each separated
-by spaces.  Use quotes ('single', "double", or \`backticks\` as desired) to
-contain interesting results or parameters, including newlines.
+One test per line.  Expected results, followed by parameters, each
+separated by spaces.  Use quotes ('single', "double", or
+\`backticks\` as desired) to contain interesting results or
+parameters, including newlines.
 
 Blank lines are ok.  Extra whitespace is ok.  Comments start with `#`.
 
@@ -55,20 +56,24 @@ some 'big things' "to
 test"
 ```
 
-Aggressive type coercion is used, including if the test JavaScript returns
-an non-string the result string is parsed as JSON before comparison.
+Aggressive type coercion is used, including if the test JavaScript
+returns an non-string the result string is parsed as JSON before
+comparison.
 
-Set file-wide globals with lines that start with `#!`, separating the name
-and the value with a colon:
+Set file-wide globals with lines that start with `#!`, separating
+the name and the value with a colon:
 
 ```
 #! name: value
 ```
 
 Special globals include:
- - "inline": the value is used as the test JavaScript instead of reading a file
- - "script": the value is used as the test JavaScript filename instead of the
-   default
+ - "inline": the value is used as the test JavaScript instead of
+   reading a file
+ - "script": the value is used as the test JavaScript filename
+   instead of the default
+ - "timeout": If any test in the file takes longer than this (in ms),
+   it fails.  Default: 2000
 
 ## JavaScript to test
 

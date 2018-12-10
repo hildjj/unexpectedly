@@ -77,6 +77,9 @@ async function suite (target = '.', defaultScript = '../$1.js') {
         ? path.resolve(dir, parsed.vars.script.value)
         : path.resolve(dir, f.replace(/([^./]*)\.tests?$/, defaultScript))
     }
+    if (parsed.vars.timeout) {
+      suite.timeout(parseInt(parsed.vars.timeout.value))
+    }
     opts.sandbox = mapObj(
       Object.entries(parsed.vars),
       ([key, value]) => [key, value.value])
@@ -84,7 +87,7 @@ async function suite (target = '.', defaultScript = '../$1.js') {
     let runner = new Runner(opts)
 
     for (const pt of parsed.tests) {
-      suite.addTest(new Mocha.Test(`line ${pt.line}`, async () => {
+      const t = new Mocha.Test(`line ${pt.line}`, async () => {
         let actual = null
         try {
           actual = await runner.run({
@@ -98,7 +101,8 @@ async function suite (target = '.', defaultScript = '../$1.js') {
         }
         assert.notStrictEqual(pt.expected, EXCEPTION)
         assert.deepStrictEqual.apply(null, coerce(actual, pt.expected))
-      }))
+      })
+      suite.addTest(t)
     }
   }
 
