@@ -4,4 +4,8 @@ node_modules/
 coverage/
 package-lock.json
 .vscode/
+vscode/
+.eslintrc
+.eslintignore
+test/
 *.tgz
