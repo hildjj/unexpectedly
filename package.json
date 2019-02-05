@@ -25,10 +25,10 @@
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "license": "MPL-2.0",
   "devDependencies": {
-    "eslint": "^5.10.0",
+    "eslint": "^5.13.0",
     "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "pegjs": "^0.10.0"
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "mocha": "^5.2.0",
-    "vm2": "^3.6.4"
+    "vm2": "^3.6.10"
   },
   "repository": {
     "type": "git",
