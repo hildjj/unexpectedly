@@ -9,3 +9,4 @@ vscode/
 .eslintignore
 test/
 *.tgz
+*.pegjs
