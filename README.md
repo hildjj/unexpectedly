@@ -87,7 +87,7 @@ You can specify JavaScript to run for each test in one of three ways:
 - Specify a global in your .tests file with the name `script`.  That is the name
   of the file, relative to the directory that contains the .tests file, to look
   for JavaScript.
-- Spcedify a global in your .tests file with the name `inline`.  That's just
+- Specify a global in your .tests file with the name `inline`.  That's just
   JavaScript to run per-line.
 
 For each of the above, make sure `module.exports` is a function, or that you
