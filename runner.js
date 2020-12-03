@@ -7,9 +7,10 @@ const vm2 = require('vm2')
 class VMScriptLines extends vm2.VMScript {
   constructor (code, { filename, lineOffset = 0, columnOffset = 0 } = {}) {
     super(code, filename)
-    this.lineOffset = lineOffset
-    this.columnOffset = columnOffset
+    this._lineOffset = lineOffset
+    this._columnOffset = columnOffset
   }
+
   compile () {
     if (this._compiled) {
       return this
@@ -18,8 +19,8 @@ class VMScriptLines extends vm2.VMScript {
     this._compiled = new vm.Script(this.code, {
       filename: this.filename,
       displayErrors: false,
-      lineOffset: this.lineOffset,
-      columnOffset: this.columnOffset
+      lineOffset: this._lineOffset,
+      columnOffset: this._columnOffset
     })
 
     return this
