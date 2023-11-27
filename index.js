@@ -1,3 +1,4 @@
+/* eslint-disable prefer-named-capture-group */
 'use strict';
 
 const assert = require('assert');
@@ -73,10 +74,9 @@ async function suite(target = '.', defaultScript = '../$1.js') {
       opts.lineOffset = parsed.vars.inline.line;
       opts.columnOffset = parsed.vars.inline.column;
     } else {
+      // TODO(hildjj): maybe name this capture group?
       opts.filename = parsed.vars.script ?
         path.resolve(dir, parsed.vars.script.value) :
-        // TODO(hildjj): maybe name this capture group?
-        // eslint-disable-next-line prefer-named-capture-group
         path.resolve(dir, f.replace(/([^./]*)\.tests?$/, defaultScript));
     }
     if (parsed.vars.timeout) {
