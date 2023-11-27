@@ -23,7 +23,15 @@
     "harness"
   ],
   "author": "Joe Hildebrand <joe-github@cursive.net>",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/hildjj/unexpectedly.git"
+  },
   "license": "MPL-2.0",
+  "dependencies": {
+    "mocha": "^10.2.0",
+    "vm2": "3.9.19"
+  },
   "devDependencies": {
     "@cto.af/eslint-config": "3.0.2",
     "eslint": "^8.54.0",
@@ -38,13 +46,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "mocha": "^10.2.0",
-    "vm2": "3.9.19"
-  },
-  "repository": {
-    "type": "git",
-    "url": "http://github.com/hildjj/unexpectedly.git"
   }
 }
