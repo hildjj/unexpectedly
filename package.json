@@ -4,11 +4,12 @@
   "description": "Keep a bunch of test cases in a file, with their expected results",
   "main": "index.js",
   "scripts": {
+    "build": "peggy -o testFile.peg.js testFile.pegjs",
+    "pretest": "npm run build",
     "test": "c8 bin/unexpectedly test",
-    "pretest": "npm run grammar",
-    "grammar": "peggy -o testFile.peg.js testFile.pegjs",
     "lint": "eslint --ext js,cjs,mjs . bin/*",
-    "ci": "npm run lint && npm run test"
+    "ci": "npm run lint && npm run test",
+    "clean": "rimraf coverage testFile.peg.js"
   },
   "bin": {
     "unexpectedly": "bin/unexpectedly"
@@ -43,7 +44,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^4.1.0",
-    "peggy": "^3.0.2"
+    "peggy": "^3.0.2",
+    "rimraf": "5.0.5"
   },
   "engines": {
     "node": ">=18"
