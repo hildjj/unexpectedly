@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
+'use strict';
 
-const suite = require('../index')
+const suite = require('../index');
 
-suite(...process.argv.slice(2)).catch(console.error)
+suite(...process.argv.slice(2)).catch(console.error);

@@ -7,7 +7,7 @@
     "test": "bin/unexpectedly test",
     "pretest": "npm run grammar",
     "grammar": "peggy -o testFile.peg.js testFile.pegjs",
-    "lint": "eslint *.js test/*.js bin/*",
+    "lint": "eslint --ext js,cjs,mjs . bin/*",
     "release": "npm version patch && git push --follow-tags && npm publish"
   },
   "bin": {
@@ -25,9 +25,12 @@
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@cto.af/eslint-config": "3.0.2",
     "eslint": "^8.54.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsdoc": "46.9.0",
+    "eslint-plugin-n": "16.3.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^4.1.0",
@@ -38,7 +41,7 @@
   },
   "dependencies": {
     "mocha": "^10.2.0",
-    "vm2": "^3.9.3"
+    "vm2": "3.9.19"
   },
   "repository": {
     "type": "git",
