@@ -84,7 +84,7 @@ async function suite (target = '.', defaultScript = '../$1.js') {
       Object.entries(parsed.vars),
       ([key, value]) => [key, value.value])
 
-    let runner = new Runner(opts)
+    const runner = new Runner(opts)
 
     for (const pt of parsed.tests) {
       const t = new Mocha.Test(`line ${pt.line}`, async () => {
