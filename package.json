@@ -7,7 +7,8 @@
     "test": "c8 bin/unexpectedly test",
     "pretest": "npm run grammar",
     "grammar": "peggy -o testFile.peg.js testFile.pegjs",
-    "lint": "eslint --ext js,cjs,mjs . bin/*"
+    "lint": "eslint --ext js,cjs,mjs . bin/*",
+    "ci": "npm run lint && npm run test"
   },
   "bin": {
     "unexpectedly": "bin/unexpectedly"
