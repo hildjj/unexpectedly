@@ -1,31 +1,6 @@
 'use strict';
 
-const fs = require('fs');
-const vm = require('vm');
 const vm2 = require('vm2');
-
-class VMScriptLines extends vm2.VMScript {
-  constructor(code, {filename, lineOffset = 0, columnOffset = 0} = {}) {
-    super(code, filename);
-    this._lineOffset = lineOffset;
-    this._columnOffset = columnOffset;
-  }
-
-  compile() {
-    if (this._compiled) {
-      return this;
-    }
-
-    this._compiled = new vm.Script(this.code, {
-      filename: this.filename,
-      displayErrors: false,
-      lineOffset: this._lineOffset,
-      columnOffset: this._columnOffset,
-    });
-
-    return this;
-  }
-}
 
 /**
  * Fancy "eval".
@@ -33,23 +8,26 @@ class VMScriptLines extends vm2.VMScript {
  * @class Runner
  */
 class Runner {
+  #env;
+  #filename;
+  #sandbox;
+  #script;
+
   constructor({
     filename = null,
     text = null,
     lineOffset = 0,
     columnOffset = 0,
     sandbox = null,
+    env = {},
   } = {}) {
     if (!text) {
-      if (!filename) {
-        throw new Error('Either file or text is required');
-      }
-      text = fs.readFileSync(filename, 'utf8');
+      throw new Error('Text is required');
     }
-    this.filename = filename;
-    this.sandbox = sandbox;
-    this.script = new VMScriptLines(text, {
-      filename,
+    this.#filename = filename;
+    this.#env = env;
+    this.#sandbox = sandbox;
+    this.#script = new vm2.VMScript(text, filename, {
       lineOffset,
       columnOffset,
     });
@@ -62,9 +40,10 @@ class Runner {
         external: true,
         builtin: ['*'],
       },
-      sandbox: {...this.sandbox, ...extra},
+      sandbox: {...this.#sandbox, ...extra},
+      env: this.#env,
     });
-    let f = nvm.run(this.script, this.filename);
+    let f = nvm.run(this.#script, this.#filename);
     if (!f) {
       throw new Error('Nothing exported');
     }

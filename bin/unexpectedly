@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-node-snapshot
 /* eslint-disable no-console */
 'use strict';
 

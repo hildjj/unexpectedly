@@ -25,7 +25,7 @@ function hexlify(buf) {
 function unhexlify(str, typ = Uint8ClampedArray) {
   str = str.replace(/^0x/i, '');
   const nibbles = typ.BYTES_PER_ELEMENT * 2;
-  return typ.from({length: str.length / nibbles}, i => {
+  return typ.from({length: str.length / nibbles}, (_v, i) => {
     const off = i * nibbles;
     return parseInt(str.slice(off, off + nibbles), 16);
   });
