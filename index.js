@@ -20,8 +20,13 @@ function coerce(actual, expected) {
     switch (name) {
       case 'Buffer':
         return [`0x${actual.toString('hex')}`, expected];
-      case 'Uint8array':
+      case 'Uint8Array':
       case 'Uint8ClampedArray':
+      case 'Uint16Array':
+      case 'Uint32Array':
+      case 'Int16Array':
+      case 'Int32Array':
+      case 'Int8Array':
         return [`0x${hexlify(actual)}`, expected];
     }
   }
@@ -41,17 +46,18 @@ function coerce(actual, expected) {
 async function suite(target = '.', defaultScript = '../$<base>.js') {
   let dir = path.resolve(target);
   let files = [dir];
+  const mocha = new Mocha();
+  mocha.suite.title = dir;
 
-  const stats = await fs.stat(target);
+  const stats = await fs.stat(dir);
   if (stats.isDirectory()) {
     files = (await fs.readdir(target))
-      .filter(f => f.endsWith('.tests'))
+      .filter(f => /\.tests?$/.test(f))
       .map(f => path.join(dir, f));
   } else if (stats.isFile()) {
     // eslint-disable-next-line require-atomic-updates
     ({dir} = path.parse(target));
   }
-  const mocha = new Mocha();
 
   for (const f of files) {
     const msuite = Mocha.Suite.create(mocha.suite, f);
@@ -65,7 +71,7 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
       if (opts.text.indexOf('exports') === -1) {
         opts.text = `module.exports= ${opts.text}`; // Most common case
       }
-      opts.lineOffset = parsed.vars.inline.line;
+      opts.lineOffset = parsed.vars.inline.line - 1;
       opts.columnOffset = parsed.vars.inline.column;
     } else {
       opts.filename = parsed.vars.script ?

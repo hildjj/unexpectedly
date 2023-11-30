@@ -4,14 +4,13 @@ module.exports = (typ) => {
   switch (typ) {
     case 'Buffer':
       return Buffer.from(__expected.slice(2), 'hex');
-    case 'Uint8ClampedArray':
-    case 'Uint8Array':
-      return unhexlify(__expected, global[typ]);
+    default:
+      return unhexlify(__expected, globalThis[typ]);
   }
-  throw new Exception('Unknown buffer type')
 }`
 
 0xAF Buffer
-#0xAF Uint8Array
+0xAF Uint8Array
+0xAF12 Uint16Array
 
 # TODO: add other TypedArray examples when they work

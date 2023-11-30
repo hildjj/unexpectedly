@@ -6,7 +6,7 @@
   "scripts": {
     "build": "peggy -o testFile.peg.js testFile.pegjs",
     "pretest": "npm run build",
-    "test": "c8 bin/unexpectedly test",
+    "test": "c8 bin/unexpectedly test test/pkg_es6/test",
     "lint": "eslint --ext js,cjs,mjs . bin/*",
     "ci": "npm run lint && npm run test",
     "clean": "rimraf coverage testFile.peg.js"
@@ -30,13 +30,11 @@
   },
   "license": "MPL-2.0",
   "dependencies": {
-    "c8": "8.0.1",
-    "isolated-vm": "4.6.0",
-    "mocha": "^10.2.0",
-    "vm2": "3.9.19"
+    "mocha": "^10.2.0"
   },
   "devDependencies": {
     "@cto.af/eslint-config": "3.0.2",
+    "c8": "8.0.1",
     "eslint": "^8.54.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.0",

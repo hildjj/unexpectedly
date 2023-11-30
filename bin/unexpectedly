@@ -1,7 +1,22 @@
-#!/usr/bin/env node --no-node-snapshot
+#!/usr/bin/env NODE_NO_WARNINGS=1 node --experimental-vm-modules
 /* eslint-disable no-console */
 'use strict';
 
 const suite = require('../index');
 
-suite(...process.argv.slice(2)).catch(console.error);
+async function main() {
+  let defaultScript = undefined;
+  let nextDefault = false;
+  for (const arg of process.argv.slice(2)) {
+    if (nextDefault) {
+      defaultScript = arg;
+    } else if (arg === '--defaultScript') {
+      nextDefault = true;
+    } else {
+      await suite(arg, defaultScript).catch(console.error);
+    }
+  }
+}
+
+main().catch(console.error);
+
