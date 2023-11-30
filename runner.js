@@ -74,32 +74,40 @@ class Runner {
     // Find package.json relative to test, decide whether we're commonjs or
     // module.
     let dir = this.#dirname;
-    const dirset = new Set();
     let type = 'commonjs';
-    while (dir) {
-      // Avoid symlink loops and c:\.
-      if (dirset.has(dir)) {
-        break;
-      }
-      dirset.add(dir);
-      try {
-        const pkg = path.join(dir, 'package.json');
-        if ((await fs.stat(pkg)).isFile()) {
-          ({type = 'commonjs'} = JSON.parse(await fs.readFile(pkg, 'utf8')));
+    if (this.#filename.endsWith('.mjs')) {
+      type = 'module';
+    } else if (!this.#filename.endsWith('.cjs')) {
+      const dirset = new Set();
+      while (dir) {
+        // Avoid symlink loops and c:\.
+        if (dirset.has(dir)) {
           break;
         }
-      } catch (er) {
-        if (!er.code === 'ENOENT') {
-          throw er;
+        dirset.add(dir);
+        try {
+          const pkg = path.join(dir, 'package.json');
+          if ((await fs.stat(pkg)).isFile()) {
+            ({type = 'commonjs'} = JSON.parse(await fs.readFile(pkg, 'utf8')));
+            break;
+          }
+        } catch (er) {
+          if (!er.code === 'ENOENT') {
+            throw er;
+          }
         }
-      }
 
-      dir = path.dirname(dir);
+        dir = path.dirname(dir);
+      }
     }
 
     const exports = {};
     const context = {
-      ...mapObj(vmGlobals, g => [g, typeof globalThis[g] === 'function' ? globalThis[g] : {...globalThis[g]}]),
+      ...mapObj(vmGlobals, g => (
+        (typeof globalThis[g] === 'function') ?
+          globalThis[g] :
+          {...globalThis[g]}
+      )),
       require: createRequire(this.#filename),
       exports,
       module: {

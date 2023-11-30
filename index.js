@@ -57,6 +57,8 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
   } else if (stats.isFile()) {
     // eslint-disable-next-line require-atomic-updates
     ({dir} = path.parse(target));
+  } else {
+    throw new Error(`Unknown file type: "${target}"`);
   }
 
   for (const f of files) {
