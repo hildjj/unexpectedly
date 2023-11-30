@@ -1,14 +1,10 @@
-{
-  const { mapObj } = require('./utils')
-  function list (head, tail) {
-    tail.unshift(head)
-    return tail
-  }
-}
+{{
+const { mapObj } = require('./utils')
+}}
+
 
 start
-  = head:(WS h:line? _ { return h }) tail:(EOL WS l:line _ {return l})* {
-    const all = list(head, tail)
+  = all:(WS @line? _)|.., EOL| {
     const vars = mapObj(all.filter(t => t && t.hasOwnProperty('name')),
       ({name, ...rest}) => [name, rest])
     return {
@@ -24,13 +20,20 @@ line
   / '' // hack
 
 var
-  = '#!' _ name:chunk _ ':' _ value:(c:chunk { return { value: c, line: location().start.line, column: location().start.column}}) _ {
+  = '#!' env:"!"? _ name:chunk _ ':' _ value:val _ {
     value.name = name;
+    value.env = Boolean(env);
     return value;
   }
 
+val
+  = value:chunk {
+    const start = location().start;
+    return { value, line: start.line, column: start.column}
+  }
+
 test
-  = expected:results inputs:(LWS inp:chunk { return inp})* comment? {
+  = expected:results inputs:(LWS @chunk)* comment? {
     return { expected, inputs, line: location().start.line }
   }
 

@@ -14,8 +14,8 @@ npm install -g unexpectedly
 unexpectedly [file|directory] [jsPattern]
   file: a file that contains tests
   directory (default: "."): a directory containing ".tests" files
-  jsPattern (default: "../$1.js"): find the JS file relative to
-  the .tests file, replacing $1 with the basename of the test file
+  jsPattern (default: "../$<base>.js"): find the JS file relative to
+  the .tests file, replacing `$<base>` with the basename of the test file
 ```
 
 ## Example
@@ -61,7 +61,8 @@ returns an non-string the result string is parsed as JSON before
 comparison.
 
 Set file-wide globals with lines that start with `#!`, separating
-the name and the value with a colon:
+the name and the value with a colon.  These globals will be made available
+to your test script as global variables:
 
 ```
 #! name: value
@@ -75,6 +76,8 @@ Special globals include:
  - "timeout": If any test in the file takes longer than this (in ms),
    it fails.  Default: 2000
 
+Environment variables can be set for the test code with `#!! name: value`.
+
 ## JavaScript to test
 
 You can specify JavaScript to run for each test in one of three ways:
@@ -82,7 +85,7 @@ You can specify JavaScript to run for each test in one of three ways:
 - Use the mapping from test file name to a JavaScript file.  By default, this
   takes the basename of the .tests file and looks up one directory for a .js
   file of the same basename.  So `tests/foo.tests` looks for `foo.js`.  If needed
-  you can replace the mapping with something else, that uses `%1` as a placeholder
+  you can replace the mapping with something else, that uses `$<base>` as a placeholder
   for the basename.
 - Specify a global in your .tests file with the name `script`.  That is the name
   of the file, relative to the directory that contains the .tests file, to look
