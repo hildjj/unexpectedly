@@ -3,6 +3,8 @@
 
 import {suite} from '../index.js';
 
+let failures = 0;
+
 async function main() {
   let defaultScript = undefined;
   let nextDefault = false;
@@ -12,10 +14,15 @@ async function main() {
     } else if (arg === '--defaultScript') {
       nextDefault = true;
     } else {
-      await suite(arg, defaultScript).catch(console.error);
+      // eslint-disable-next-line require-atomic-updates
+      failures += await suite(arg, defaultScript);
     }
   }
 }
 
-main().catch(console.error);
+await main().catch(console.error);
 
+if (failures) {
+  console.error(`Total of ${failures} failure${failures === 1 ? '' : 's'}`);
+  process.exit(1);
+}

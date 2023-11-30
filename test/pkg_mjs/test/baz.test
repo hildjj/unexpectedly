@@ -1,0 +1,2 @@
+#! inline: `export {baz as test} from '../foo.js'`
+6
