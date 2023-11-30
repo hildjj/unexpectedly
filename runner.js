@@ -1,10 +1,8 @@
-'use strict';
-
-const {mapObj} = require('./utils');
-const vm = require('node:vm');
-const {createRequire} = require('node:module');
-const path = require('node:path');
-const fs = require('node:fs').promises;
+import {createRequire} from 'node:module';
+import fs from 'fs/promises';
+import {mapObj} from './utils.js';
+import path from 'node:path';
+import vm from 'node:vm';
 
 const vmGlobals = new vm.Script('Object.getOwnPropertyNames(globalThis)')
   .runInNewContext()
@@ -41,7 +39,7 @@ async function linker(specifier, referencingModule, cache) {
  *
  * @class Runner
  */
-class Runner {
+export class Runner {
   #columnOffset;
   #dirname;
   #env;
@@ -130,6 +128,10 @@ class Runner {
     const imports = new Map();
 
     if (type === 'module') {
+      if (this.#text.indexOf('export') === -1) {
+        this.#text = `export default ${this.#text}`; // Most common case
+      }
+
       const mod = new vm.SourceTextModule(this.#text, {
         context,
         id: this.#filename,
@@ -138,7 +140,7 @@ class Runner {
       });
 
       await mod.link((specifier, referencingModule) => {
-        if (path.isAbsolute(specifier) || /^\.\//.test(specifier)) {
+        if (path.isAbsolute(specifier) || /^\.\.?\//.test(specifier)) {
           return linker(
             path.resolve(path.dirname(this.#filename), specifier),
             referencingModule,
@@ -155,6 +157,10 @@ class Runner {
         f = f.default;
       }
     } else {
+      if (this.#text.indexOf('exports') === -1) {
+        this.#text = `module.exports= ${this.#text}`; // Most common case
+      }
+
       const script = new vm.Script(this.#text, {
         filename: this.#filename,
         lineOffset: this.#lineOffset,
@@ -175,5 +181,3 @@ class Runner {
     return f(...params);
   }
 }
-
-module.exports = Runner;

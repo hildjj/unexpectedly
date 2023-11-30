@@ -1,12 +1,10 @@
-'use strict';
-
-const assert = require('assert');
-const fs = require('fs').promises;
-const path = require('path');
-const Mocha = require('mocha'); // TODO: just use one of the reporters
-const parser = require('./testFile.peg');
-const Runner = require('./runner');
-const {mapObj, hexlify} = require('./utils');
+import {hexlify, mapObj} from './utils.js';
+import Mocha from 'mocha';
+import {Runner} from './runner.js';
+import assert from 'node:assert';
+import fs from 'node:fs/promises';
+import {parse} from './testFile.peg.js';
+import path from 'node:path';
 
 const EXCEPTION = Symbol('EXCEPTION');
 
@@ -43,7 +41,7 @@ function coerce(actual, expected) {
  *   will use "../foo.js" by default.
  * @returns {Promise<void>} Promise fulfills on success.
  */
-async function suite(target = '.', defaultScript = '../$<base>.js') {
+export async function suite(target = '.', defaultScript = '../$<base>.js') {
   let dir = path.resolve(target);
   let files = [dir];
   const mocha = new Mocha();
@@ -64,15 +62,12 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
   for (const f of files) {
     const msuite = Mocha.Suite.create(mocha.suite, f);
     const contents = await fs.readFile(f, 'utf8');
-    const parsed = parser.parse(contents, {EXCEPTION});
+    const parsed = parse(contents, {EXCEPTION});
 
     const opts = {};
     if (parsed.vars.inline) {
       opts.filename = f;
       opts.text = parsed.vars.inline.value;
-      if (opts.text.indexOf('exports') === -1) {
-        opts.text = `module.exports= ${opts.text}`; // Most common case
-      }
       opts.lineOffset = parsed.vars.inline.line - 1;
       opts.columnOffset = parsed.vars.inline.column;
     } else {
@@ -120,4 +115,3 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
 }
 
 suite.EXCEPTION = EXCEPTION;
-module.exports = suite;

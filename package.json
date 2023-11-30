@@ -3,16 +3,17 @@
   "version": "0.0.7",
   "description": "Keep a bunch of test cases in a file, with their expected results",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "peggy -o testFile.peg.js testFile.pegjs",
+    "build": "peggy -o testFile.peg.js --format es testFile.pegjs",
     "pretest": "npm run build",
-    "test": "c8 bin/unexpectedly test test/pkg_es6/test",
+    "test": "c8 bin/unexpectedly.js test test/pkg_mjs/test test/pkg_cjs/test",
     "lint": "eslint --ext js,cjs,mjs . bin/*",
     "ci": "npm run lint && npm run test",
     "clean": "rimraf coverage testFile.peg.js"
   },
   "bin": {
-    "unexpectedly": "bin/unexpectedly"
+    "unexpectedly": "bin/unexpectedly.js"
   },
   "keywords": [
     "test",

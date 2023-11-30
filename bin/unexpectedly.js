@@ -1,8 +1,7 @@
 #!/usr/bin/env -S node --experimental-vm-modules --no-warnings
 /* eslint-disable no-console */
-'use strict';
 
-const suite = require('../index');
+import {suite} from '../index.js';
 
 async function main() {
   let defaultScript = undefined;

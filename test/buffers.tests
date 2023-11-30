@@ -1,6 +1,7 @@
 #! inline: `
-const {unhexlify} = require('../utils')
-module.exports = (typ) => {
+import {unhexlify} from '../utils.js';
+
+export function test(typ) {
   switch (typ) {
     case 'Buffer':
       return Buffer.from(__expected.slice(2), 'hex');

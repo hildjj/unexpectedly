@@ -1,5 +1,5 @@
 {
-  "name": "pkg_es6",
+  "name": "pkg_mjs",
   "private": true,
   "type": "module"
 }
