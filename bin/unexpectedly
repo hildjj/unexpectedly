@@ -1,4 +1,4 @@
-#!/usr/bin/env NODE_NO_WARNINGS=1 node --experimental-vm-modules
+#!/usr/bin/env -S node --experimental-vm-modules --no-warnings
 /* eslint-disable no-console */
 'use strict';
 
