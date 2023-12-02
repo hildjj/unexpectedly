@@ -10,6 +10,7 @@ const vmGlobals = new vm.Script('Object.getOwnPropertyNames(globalThis)')
 vmGlobals.push('process', 'Buffer');
 
 async function linker(specifier, referencingModule, cache) {
+  // Note: not convinced the cache actually does anything, due to timing.
   if (cache?.has(specifier)) {
     return cache.get(specifier);
   }
@@ -56,9 +57,6 @@ export class Runner {
     sandbox = null,
     env = {},
   } = {}) {
-    if (!text || !filename) {
-      throw new Error('Text and filename required');
-    }
     this.#text = text;
     this.#filename = filename;
     this.#dirname = path.dirname(filename);
@@ -90,7 +88,7 @@ export class Runner {
             break;
           }
         } catch (er) {
-          if (!er.code === 'ENOENT') {
+          if (er.code !== 'ENOENT') {
             throw er;
           }
         }
@@ -140,14 +138,14 @@ export class Runner {
       });
 
       await mod.link((specifier, referencingModule) => {
-        if (path.isAbsolute(specifier) || /^\.\.?\//.test(specifier)) {
-          return linker(
-            path.resolve(path.dirname(this.#filename), specifier),
-            referencingModule,
-            imports
-          );
+        if (path.isAbsolute(specifier) || !/^\.\.?\//.test(specifier)) {
+          return linker(specifier, referencingModule, imports);
         }
-        return linker(specifier, referencingModule, imports);
+        return linker(
+          path.resolve(path.dirname(this.#filename), specifier),
+          referencingModule,
+          imports
+        );
       });
       await mod.evaluate();
       f = mod.namespace;
@@ -167,16 +165,12 @@ export class Runner {
         columnOffset: this.#columnOffset,
       });
       f = script.runInContext(context);
-      if (typeof f !== 'function') {
-        f = f.test;
-        if (typeof f !== 'function') {
-          throw new Error('Must export function or {test}');
-        }
-      }
     }
-
-    if (!f) {
-      throw new Error('Nothing exported');
+    if (typeof f !== 'function') {
+      f = f?.test;
+      if (typeof f !== 'function') {
+        throw new Error('Must export function or {test}');
+      }
     }
     return f(...params);
   }

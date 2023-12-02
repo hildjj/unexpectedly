@@ -71,12 +71,12 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
       parsed = parse(contents, {EXCEPTION, grammarSource: f});
     } catch (er) {
       if (typeof er.format === 'function') {
-        // eslint-disable-next-line no-console
-        console.error(er.format([{
+        er.message = er.format([{
           source: f,
           text: contents,
-        }]));
-        continue;
+        }]);
+        delete er.expected;
+        delete er.location;
       }
       throw er;
     }
@@ -107,7 +107,8 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
     const runner = new Runner(opts);
 
     for (const pt of parsed.tests) {
-      const t = new Mocha.Test(`line ${pt.line}: ${pt.expected.split(/\n/)[0] || '""'}`, async() => {
+      const firstLine = (pt.expected === EXCEPTION) ? '!' : pt.expected.split(/\n/)[0];
+      const t = new Mocha.Test(`line ${pt.line}: ${firstLine || '""'}`, async() => {
         let actual = null;
         try {
           actual = await runner.run({
@@ -122,7 +123,7 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
           return;
         }
         assert.notStrictEqual(pt.expected, EXCEPTION);
-        assert.deepStrictEqual.apply(null, coerce(actual, pt.expected));
+        assert.deepEqual.apply(null, coerce(actual, pt.expected));
       });
       msuite.addTest(t);
     }

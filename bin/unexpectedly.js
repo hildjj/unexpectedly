@@ -11,6 +11,7 @@ async function main() {
   for (const arg of process.argv.slice(2)) {
     if (nextDefault) {
       defaultScript = arg;
+      nextDefault = false;
     } else if (arg === '--defaultScript') {
       nextDefault = true;
     } else {
@@ -20,9 +21,12 @@ async function main() {
   }
 }
 
-await main().catch(console.error);
+await main().catch(er => {
+  console.error(er);
+  process.exit(1);
+});
 
 if (failures) {
   console.error(`Total of ${failures} failure${failures === 1 ? '' : 's'}`);
-  process.exit(1);
+  process.exit(2);
 }

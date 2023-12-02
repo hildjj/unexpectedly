@@ -1,3 +1,4 @@
+#! timeout: 10000
 #! inline: `
 import {unhexlify} from '../utils.js';
 
@@ -13,5 +14,6 @@ export function test(typ) {
 0xAF Buffer
 0xAF Uint8Array
 0xAF12 Uint16Array
+0xcdcccc3dcdcc4c3e Float32Array
 
 # TODO: add other TypedArray examples when they work

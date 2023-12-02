@@ -1,4 +1,5 @@
 import bar from './bar.js';
+import fs from 'fs/promises';
 
 /**
  * Function that calls an imported async function.
@@ -17,4 +18,14 @@ export default async function foo(goo) {
  */
 export function baz() {
   return 6;
+}
+
+/**
+ * Wrapper around fs.promises.stat to force fs to be imported twice.
+ *
+ * @param {string} f File.
+ * @returns {ReturnType<fs.stat>} Info on file.
+ */
+export function stat(f) {
+  return fs.stat(f);
 }

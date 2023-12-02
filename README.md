@@ -4,7 +4,7 @@ Write a bunch of unit tests in a simple file.
 
 ## Install
 
-```
+```sh
 npm install -g unexpectedly
 ```
 
@@ -51,7 +51,7 @@ tests/baz.tests:
 ```
 
 run:
-```
+```sh
 unexpectedly tests/
 ```
 
