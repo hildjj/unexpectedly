@@ -6,6 +6,7 @@ module.exports = {
   ignorePatterns: [
     'node_modules/',
     '*.peg.js',
+    'test/pkg_bad',
   ],
   parserOptions: {
     ecmaVersion: 13,
