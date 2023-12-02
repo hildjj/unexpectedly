@@ -32,7 +32,7 @@ describe('CLI', () => {
 
   it('handles invalid package.json files', async() => {
     const {exitCode} = await $`./bin/unexpectedly.js test/pkg_bad`.quiet().nothrow();
-    assert.equal(exitCode, 2);
+    assert.equal(exitCode, 0);
   });
 
   it('handles invalid exports', async() => {
@@ -48,10 +48,10 @@ describe('CLI', () => {
   if (os.platform() !== 'win32') {
     it('detects odd file types', async() => {
       const fifoName = '__testFIFO__';
-      await $`mkfifo ${fifoName}`;
+      await $`mkfifo ${fifoName}`.quiet();
       const {exitCode} = await $`./bin/unexpectedly.js ${fifoName}`.quiet().nothrow();
       assert.equal(exitCode, 1);
-      await $`rm ${fifoName}`;
+      await $`rm ${fifoName}`.quiet();
     });
   }
 });

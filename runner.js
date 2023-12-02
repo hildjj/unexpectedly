@@ -1,5 +1,5 @@
+import {ModType} from './modtype.js';
 import {createRequire} from 'node:module';
-import fs from 'fs/promises';
 import {mapObj} from './utils.js';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -48,6 +48,7 @@ export class Runner {
   #lineOffset;
   #sandbox;
   #text;
+  #type;
 
   constructor({
     text = null, // Required
@@ -56,6 +57,7 @@ export class Runner {
     columnOffset = 0,
     sandbox = null,
     env = {},
+    type = null,
   } = {}) {
     this.#text = text;
     this.#filename = filename;
@@ -64,39 +66,15 @@ export class Runner {
     this.#sandbox = sandbox;
     this.#columnOffset = columnOffset;
     this.#lineOffset = lineOffset;
+    this.#type = type;
   }
 
   async run(extra = {}, ...params) {
+    if (!this.#type) {
+      this.#type = await ModType.find(this.#filename);
+    }
     // Find package.json relative to test, decide whether we're commonjs or
     // module.
-    let dir = this.#dirname;
-    let type = 'commonjs';
-    if (this.#filename.endsWith('.mjs')) {
-      type = 'module';
-    } else if (!this.#filename.endsWith('.cjs')) {
-      const dirset = new Set();
-      while (dir) {
-        // Avoid symlink loops and c:\.
-        if (dirset.has(dir)) {
-          break;
-        }
-        dirset.add(dir);
-        try {
-          const pkg = path.join(dir, 'package.json');
-          if ((await fs.stat(pkg)).isFile()) {
-            ({type = 'commonjs'} = JSON.parse(await fs.readFile(pkg, 'utf8')));
-            break;
-          }
-        } catch (er) {
-          if (er.code !== 'ENOENT') {
-            throw er;
-          }
-        }
-
-        dir = path.dirname(dir);
-      }
-    }
-
     const exports = {};
     const context = {
       ...mapObj(vmGlobals, g => (
@@ -125,7 +103,7 @@ export class Runner {
     let f = null;
     const imports = new Map();
 
-    if (type === 'module') {
+    if (this.#type === 'module') {
       if (this.#text.indexOf('export') === -1) {
         this.#text = `export default ${this.#text}`; // Most common case
       }
