@@ -1,5 +1,5 @@
+import {ModType} from './modtype.js';
 import {createRequire} from 'node:module';
-import fs from 'fs/promises';
 import {mapObj} from './utils.js';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -47,56 +47,31 @@ export class Runner {
   #filename;
   #lineOffset;
   #sandbox;
-  #text;
+  #type;
 
   constructor({
-    text = null, // Required
     filename = null, // Resolved
     lineOffset = 0,
     columnOffset = 0,
     sandbox = null,
     env = {},
+    type = null,
   } = {}) {
-    this.#text = text;
     this.#filename = filename;
     this.#dirname = path.dirname(filename);
     this.#env = env;
     this.#sandbox = sandbox;
     this.#columnOffset = columnOffset;
     this.#lineOffset = lineOffset;
+    this.#type = type;
   }
 
-  async run(extra = {}, ...params) {
+  async parse(text, extra = {}) {
+    if (!this.#type) {
+      this.#type = await ModType.find(this.#filename);
+    }
     // Find package.json relative to test, decide whether we're commonjs or
     // module.
-    let dir = this.#dirname;
-    let type = 'commonjs';
-    if (this.#filename.endsWith('.mjs')) {
-      type = 'module';
-    } else if (!this.#filename.endsWith('.cjs')) {
-      const dirset = new Set();
-      while (dir) {
-        // Avoid symlink loops and c:\.
-        if (dirset.has(dir)) {
-          break;
-        }
-        dirset.add(dir);
-        try {
-          const pkg = path.join(dir, 'package.json');
-          if ((await fs.stat(pkg)).isFile()) {
-            ({type = 'commonjs'} = JSON.parse(await fs.readFile(pkg, 'utf8')));
-            break;
-          }
-        } catch (er) {
-          if (er.code !== 'ENOENT') {
-            throw er;
-          }
-        }
-
-        dir = path.dirname(dir);
-      }
-    }
-
     const exports = {};
     const context = {
       ...mapObj(vmGlobals, g => (
@@ -125,12 +100,12 @@ export class Runner {
     let f = null;
     const imports = new Map();
 
-    if (type === 'module') {
-      if (this.#text.indexOf('export') === -1) {
-        this.#text = `export default ${this.#text}`; // Most common case
+    if (this.#type === 'module') {
+      if (text.indexOf('export') === -1) {
+        text = `export default ${text}`; // Most common case
       }
 
-      const mod = new vm.SourceTextModule(this.#text, {
+      const mod = new vm.SourceTextModule(text, {
         context,
         id: this.#filename,
         lineOffset: this.#lineOffset,
@@ -149,25 +124,25 @@ export class Runner {
       });
       await mod.evaluate();
       f = mod.namespace;
-      if (typeof f.test === 'function') {
-        f = f.test;
-      } else {
-        f = f.default;
-      }
     } else {
-      if (this.#text.indexOf('exports') === -1) {
-        this.#text = `module.exports= ${this.#text}`; // Most common case
+      if (text.indexOf('exports') === -1) {
+        text = `module.exports= ${text}`; // Most common case
       }
 
-      const script = new vm.Script(this.#text, {
+      const script = new vm.Script(text, {
         filename: this.#filename,
         lineOffset: this.#lineOffset,
         columnOffset: this.#columnOffset,
       });
       f = script.runInContext(context);
     }
+    return f;
+  }
+
+  async run(text, extra = {}, ...params) {
+    let f = await this.parse(text, extra);
     if (typeof f !== 'function') {
-      f = f?.test;
+      f = f?.test ?? f?.default;
       if (typeof f !== 'function') {
         throw new Error('Must export function or {test}');
       }

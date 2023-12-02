@@ -8,29 +8,38 @@ import path from 'node:path';
 
 const EXCEPTION = Symbol('EXCEPTION');
 
-function coerce(actual, expected) {
+async function coerce(actual, pt, runner) {
+  const {expected} = pt;
   if (typeof actual === 'string') {
     return [actual, expected];
   }
   if (actual && (typeof actual === 'object') && actual.constructor) {
-    const {name} = actual.constructor;
+    if (/^0x/.test(expected)) {
+      const {name} = actual.constructor;
 
-    switch (name) {
-      case 'Buffer':
-        return [`0x${actual.toString('hex')}`, expected];
-      case 'Float32Array':
-      case 'Float64Array':
-      case 'Int16Array':
-      case 'Int32Array':
-      case 'Int8Array':
-      case 'Uint16Array':
-      case 'Uint32Array':
-      case 'Uint8Array':
-      case 'Uint8ClampedArray':
-        return [`0x${hexlify(actual)}`, expected];
+      switch (name) {
+        case 'Buffer':
+          return [`0x${actual.toString('hex')}`, expected];
+        case 'Float32Array':
+        case 'Float64Array':
+        case 'Int16Array':
+        case 'Int32Array':
+        case 'Int8Array':
+        case 'Uint16Array':
+        case 'Uint32Array':
+        case 'Uint8Array':
+        case 'Uint8ClampedArray':
+          return [`0x${hexlify(actual)}`, expected];
+      }
     }
   }
-  return [actual, JSON.parse(expected)];
+
+  const exp = await runner.parse(expected, {
+    __line: pt.line,
+    __column: pt.column,
+  });
+  const def = Object.hasOwn(exp, 'default') ? exp.default : exp;
+  return [actual, def];
 }
 
 /**
@@ -82,16 +91,17 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
     }
 
     const opts = {};
+    let text = '';
     if (parsed.vars.inline) {
       opts.filename = f;
-      opts.text = parsed.vars.inline.value;
+      text = parsed.vars.inline.value;
       opts.lineOffset = parsed.vars.inline.line - 1;
       opts.columnOffset = parsed.vars.inline.column;
     } else {
       opts.filename = parsed.vars.script ?
         path.resolve(dir, parsed.vars.script.value) :
         path.resolve(dir, f.replace(/(?<base>[^./]*)\.tests?$/, defaultScript));
-      opts.text = await fs.readFile(opts.filename, 'utf8');
+      text = await fs.readFile(opts.filename, 'utf8');
     }
     if (parsed.vars.timeout) {
       msuite.timeout(parseInt(parsed.vars.timeout.value, 10));
@@ -111,7 +121,7 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
       const t = new Mocha.Test(`line ${pt.line}: ${firstLine || '""'}`, async() => {
         let actual = null;
         try {
-          actual = await runner.run({
+          actual = await runner.run(text, {
             __expected: pt.expected,
             __line: pt.line,
             __column: pt.column,
@@ -123,7 +133,7 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
           return;
         }
         assert.notStrictEqual(pt.expected, EXCEPTION);
-        assert.deepEqual.apply(null, coerce(actual, pt.expected));
+        assert.deepEqual.apply(null, await coerce(actual, pt, runner));
       });
       msuite.addTest(t);
     }

@@ -1,0 +1,3 @@
+#!inline: `() => [4n, Symbol.for('nonJSON.tests'), new Uint8Array([2, 3])]`
+
+`[4n, Symbol.for('nonJSON.tests'), new Uint8Array([2, 3])]`

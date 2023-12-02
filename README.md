@@ -80,7 +80,7 @@ test"
 ```
 
 Aggressive type coercion is used, including if the test JavaScript
-returns an non-string the result string is parsed as JSON before
+returns an non-string the result string is parsed as JavaScript before
 comparison.
 
 Set file-wide globals with lines that start with `#!`, separating

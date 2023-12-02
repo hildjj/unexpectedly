@@ -265,7 +265,8 @@ function peg$parse(input, options) {
     return { value, line: start.line, column: start.column}
   };
   var peg$f3 = function(expected, inputs) {
-    return { expected, inputs, line: location().start.line }
+    const start = location().start;
+    return { expected, inputs, line: start.line, column: start.column }
   };
   var peg$f4 = function() { return options.EXCEPTION || "!" };
   var peg$f5 = function(info) { return info.join('') };
