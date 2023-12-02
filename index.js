@@ -1,12 +1,10 @@
-'use strict';
-
-const assert = require('assert');
-const fs = require('fs').promises;
-const path = require('path');
-const Mocha = require('mocha'); // TODO: just use one of the reporters
-const parser = require('./testFile.peg');
-const Runner = require('./runner');
-const {mapObj, hexlify} = require('./utils');
+import {hexlify, mapObj} from './utils.js';
+import Mocha from 'mocha';
+import {Runner} from './runner.js';
+import assert from 'node:assert';
+import fs from 'node:fs/promises';
+import {parse} from './testFile.peg.js';
+import path from 'node:path';
 
 const EXCEPTION = Symbol('EXCEPTION');
 
@@ -20,13 +18,15 @@ function coerce(actual, expected) {
     switch (name) {
       case 'Buffer':
         return [`0x${actual.toString('hex')}`, expected];
-      case 'Uint8Array':
-      case 'Uint8ClampedArray':
-      case 'Uint16Array':
-      case 'Uint32Array':
+      case 'Float32Array':
+      case 'Float64Array':
       case 'Int16Array':
       case 'Int32Array':
       case 'Int8Array':
+      case 'Uint16Array':
+      case 'Uint32Array':
+      case 'Uint8Array':
+      case 'Uint8ClampedArray':
         return [`0x${hexlify(actual)}`, expected];
     }
   }
@@ -36,14 +36,15 @@ function coerce(actual, expected) {
 /**
  * Run a test suite from a file or directory.
  *
- * @param {string} [target='.'] The file or directory to read.  If a directory,
- *   reads all files ending in `.tests`.
- * @param {string} [defaultScript='../$<base>.js'] Find the script from the file
- *   name.  Replace $1 with the basename of the file.  For example, "foo.test"
- *   will use "../foo.js" by default.
- * @returns {Promise<void>} Promise fulfills on success.
+ * @param {string} [target='.'] The file or directory to read.  If a
+ *   directory, reads all files ending in `.tests`.
+ * @param {string} [defaultScript='../$<base>.js'] Find the script from the
+ *   file name.  Replace $1 with the basename of the file.  For example,
+ *   "foo.test" will use "../foo.js" by default.
+ * @returns {Promise<number>} Promise fulfills on completion, with number of
+ *   test failures.
  */
-async function suite(target = '.', defaultScript = '../$<base>.js') {
+export async function suite(target = '.', defaultScript = '../$<base>.js') {
   let dir = path.resolve(target);
   let files = [dir];
   const mocha = new Mocha();
@@ -57,20 +58,33 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
   } else if (stats.isFile()) {
     // eslint-disable-next-line require-atomic-updates
     ({dir} = path.parse(target));
+  } else {
+    throw new Error(`Unknown file type: "${target}"`);
   }
 
   for (const f of files) {
     const msuite = Mocha.Suite.create(mocha.suite, f);
     const contents = await fs.readFile(f, 'utf8');
-    const parsed = parser.parse(contents, {EXCEPTION});
+
+    let parsed = null;
+    try {
+      parsed = parse(contents, {EXCEPTION, grammarSource: f});
+    } catch (er) {
+      if (typeof er.format === 'function') {
+        er.message = er.format([{
+          source: f,
+          text: contents,
+        }]);
+        delete er.expected;
+        delete er.location;
+      }
+      throw er;
+    }
 
     const opts = {};
     if (parsed.vars.inline) {
       opts.filename = f;
       opts.text = parsed.vars.inline.value;
-      if (opts.text.indexOf('exports') === -1) {
-        opts.text = `module.exports= ${opts.text}`; // Most common case
-      }
       opts.lineOffset = parsed.vars.inline.line - 1;
       opts.columnOffset = parsed.vars.inline.column;
     } else {
@@ -93,7 +107,8 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
     const runner = new Runner(opts);
 
     for (const pt of parsed.tests) {
-      const t = new Mocha.Test(`line ${pt.line}: ${pt.expected.split(/\n/)[0] || '""'}`, async() => {
+      const firstLine = (pt.expected === EXCEPTION) ? '!' : pt.expected.split(/\n/)[0];
+      const t = new Mocha.Test(`line ${pt.line}: ${firstLine || '""'}`, async() => {
         let actual = null;
         try {
           actual = await runner.run({
@@ -102,11 +117,13 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
             __column: pt.column,
           }, ...pt.inputs);
         } catch (e) {
-          assert.strictEqual(pt.expected, EXCEPTION, e);
+          if (pt.expected !== EXCEPTION) {
+            throw e;
+          }
           return;
         }
         assert.notStrictEqual(pt.expected, EXCEPTION);
-        assert.deepStrictEqual.apply(null, coerce(actual, pt.expected));
+        assert.deepEqual.apply(null, coerce(actual, pt.expected));
       });
       msuite.addTest(t);
     }
@@ -118,4 +135,3 @@ async function suite(target = '.', defaultScript = '../$<base>.js') {
 }
 
 suite.EXCEPTION = EXCEPTION;
-module.exports = suite;

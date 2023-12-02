@@ -1,10 +1,8 @@
-'use strict';
-
-const {mapObj} = require('./utils');
-const vm = require('node:vm');
-const {createRequire} = require('node:module');
-const path = require('node:path');
-const fs = require('node:fs').promises;
+import {createRequire} from 'node:module';
+import fs from 'fs/promises';
+import {mapObj} from './utils.js';
+import path from 'node:path';
+import vm from 'node:vm';
 
 const vmGlobals = new vm.Script('Object.getOwnPropertyNames(globalThis)')
   .runInNewContext()
@@ -12,6 +10,7 @@ const vmGlobals = new vm.Script('Object.getOwnPropertyNames(globalThis)')
 vmGlobals.push('process', 'Buffer');
 
 async function linker(specifier, referencingModule, cache) {
+  // Note: not convinced the cache actually does anything, due to timing.
   if (cache?.has(specifier)) {
     return cache.get(specifier);
   }
@@ -41,7 +40,7 @@ async function linker(specifier, referencingModule, cache) {
  *
  * @class Runner
  */
-class Runner {
+export class Runner {
   #columnOffset;
   #dirname;
   #env;
@@ -58,9 +57,6 @@ class Runner {
     sandbox = null,
     env = {},
   } = {}) {
-    if (!text || !filename) {
-      throw new Error('Text and filename required');
-    }
     this.#text = text;
     this.#filename = filename;
     this.#dirname = path.dirname(filename);
@@ -74,32 +70,40 @@ class Runner {
     // Find package.json relative to test, decide whether we're commonjs or
     // module.
     let dir = this.#dirname;
-    const dirset = new Set();
     let type = 'commonjs';
-    while (dir) {
-      // Avoid symlink loops and c:\.
-      if (dirset.has(dir)) {
-        break;
-      }
-      dirset.add(dir);
-      try {
-        const pkg = path.join(dir, 'package.json');
-        if ((await fs.stat(pkg)).isFile()) {
-          ({type = 'commonjs'} = JSON.parse(await fs.readFile(pkg, 'utf8')));
+    if (this.#filename.endsWith('.mjs')) {
+      type = 'module';
+    } else if (!this.#filename.endsWith('.cjs')) {
+      const dirset = new Set();
+      while (dir) {
+        // Avoid symlink loops and c:\.
+        if (dirset.has(dir)) {
           break;
         }
-      } catch (er) {
-        if (!er.code === 'ENOENT') {
-          throw er;
+        dirset.add(dir);
+        try {
+          const pkg = path.join(dir, 'package.json');
+          if ((await fs.stat(pkg)).isFile()) {
+            ({type = 'commonjs'} = JSON.parse(await fs.readFile(pkg, 'utf8')));
+            break;
+          }
+        } catch (er) {
+          if (er.code !== 'ENOENT') {
+            throw er;
+          }
         }
-      }
 
-      dir = path.dirname(dir);
+        dir = path.dirname(dir);
+      }
     }
 
     const exports = {};
     const context = {
-      ...mapObj(vmGlobals, g => [g, typeof globalThis[g] === 'function' ? globalThis[g] : {...globalThis[g]}]),
+      ...mapObj(vmGlobals, g => (
+        (typeof globalThis[g] === 'function') ?
+          globalThis[g] :
+          {...globalThis[g]}
+      )),
       require: createRequire(this.#filename),
       exports,
       module: {
@@ -122,6 +126,10 @@ class Runner {
     const imports = new Map();
 
     if (type === 'module') {
+      if (this.#text.indexOf('export') === -1) {
+        this.#text = `export default ${this.#text}`; // Most common case
+      }
+
       const mod = new vm.SourceTextModule(this.#text, {
         context,
         id: this.#filename,
@@ -130,14 +138,14 @@ class Runner {
       });
 
       await mod.link((specifier, referencingModule) => {
-        if (path.isAbsolute(specifier) || /^\.\//.test(specifier)) {
-          return linker(
-            path.resolve(path.dirname(this.#filename), specifier),
-            referencingModule,
-            imports
-          );
+        if (path.isAbsolute(specifier) || !/^\.\.?\//.test(specifier)) {
+          return linker(specifier, referencingModule, imports);
         }
-        return linker(specifier, referencingModule, imports);
+        return linker(
+          path.resolve(path.dirname(this.#filename), specifier),
+          referencingModule,
+          imports
+        );
       });
       await mod.evaluate();
       f = mod.namespace;
@@ -147,25 +155,23 @@ class Runner {
         f = f.default;
       }
     } else {
+      if (this.#text.indexOf('exports') === -1) {
+        this.#text = `module.exports= ${this.#text}`; // Most common case
+      }
+
       const script = new vm.Script(this.#text, {
         filename: this.#filename,
         lineOffset: this.#lineOffset,
         columnOffset: this.#columnOffset,
       });
       f = script.runInContext(context);
-      if (typeof f !== 'function') {
-        f = f.test;
-        if (typeof f !== 'function') {
-          throw new Error('Must export function or {test}');
-        }
-      }
     }
-
-    if (!f) {
-      throw new Error('Nothing exported');
+    if (typeof f !== 'function') {
+      f = f?.test;
+      if (typeof f !== 'function') {
+        throw new Error('Must export function or {test}');
+      }
     }
     return f(...params);
   }
 }
-
-module.exports = Runner;

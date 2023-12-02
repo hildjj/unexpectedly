@@ -1,5 +1,5 @@
 {{
-const { mapObj } = require('./utils')
+import { mapObj } from './utils.js'
 }}
 
 

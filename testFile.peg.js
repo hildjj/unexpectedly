@@ -2,10 +2,8 @@
 //
 // https://peggyjs.org/
 
-"use strict";
 
-
-const { mapObj } = require('./utils')
+import { mapObj } from './utils.js'
 
 function peg$subclass(child, parent) {
   function C() { this.constructor = child; }
@@ -1406,7 +1404,8 @@ function peg$parse(input, options) {
   }
 }
 
-module.exports = {
-  SyntaxError: peg$SyntaxError,
-  parse: peg$parse
+export {
+  peg$SyntaxError as SyntaxError,
+
+  peg$parse as parse
 };

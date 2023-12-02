@@ -1,5 +1,3 @@
-'use strict';
+import {parse} from '../testFile.peg.js';
 
-const {parse} = require('../testFile.peg');
-
-module.exports = text => parse(text).tests;
+export default text => parse(text).tests;

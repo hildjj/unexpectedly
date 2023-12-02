@@ -1,0 +1,3 @@
+#!inline: `() => throw new Exception('hi')`
+
+!
