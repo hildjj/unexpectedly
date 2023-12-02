@@ -34,7 +34,8 @@ val
 
 test
   = expected:results inputs:(LWS @chunk)* comment? {
-    return { expected, inputs, line: location().start.line }
+    const start = location().start;
+    return { expected, inputs, line: start.line, column: start.column }
   }
 
 results
