@@ -27,11 +27,14 @@ exposed as the default export or exported as a function named `test`:
 
 tests/bar.tests:
 ```
+# "8" is the expected result, "4" and "2" are the inputs to the tested function
 8 4 2
 ```
 
 bar.js:
 ```js
+// The default or `test` export from the associated .js file is the
+// tested function by default
 export default mult(a, b) {
   return a * b;
 }
@@ -41,12 +44,12 @@ export function baz(a) {
 }
 ```
 
-In this case, we needed to write a little wrapper code:
+To test the `baz` function, we needed to write a little wrapper code:
 
 tests/baz.tests:
 ```
 #! inline: `export {baz as test} from '../foo.js'`
-6 1
+6 1 # Expect 6 to result from `baz("1")`
 12 2
 ```
 
