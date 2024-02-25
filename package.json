@@ -32,23 +32,18 @@
   },
   "license": "MPL-2.0",
   "dependencies": {
-    "mocha": "^10.2.0"
+    "mocha": "^10.3.0"
   },
   "devDependencies": {
-    "@cto.af/eslint-config": "3.0.2",
-    "c8": "8.0.1",
-    "eslint": "^8.54.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-jsdoc": "46.9.0",
-    "eslint-plugin-n": "16.3.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-standard": "^4.1.0",
-    "peggy": "^3.0.2",
+    "@cto.af/eslint-config": "3.1.0",
+    "c8": "9.1.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-jsdoc": "48.2.0",
+    "peggy": "^4.0.1",
     "rimraf": "5.0.5",
     "zx": "7.2.3"
   },
+  "packageManager": "pnpm@8.15.4",
   "engines": {
     "node": ">=18"
   }
