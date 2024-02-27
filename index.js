@@ -5,6 +5,7 @@ import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import {parse} from './testFile.peg.js';
 import path from 'node:path';
+import util from 'node:util';
 
 const EXCEPTION = Symbol('EXCEPTION');
 
@@ -106,7 +107,7 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
     if (parsed.vars.timeout) {
       msuite.timeout(parseInt(parsed.vars.timeout.value, 10));
     }
-    opts.sandbox = mapObj(
+    opts.context = mapObj(
       Object.entries(parsed.vars).filter(([k, v]) => !v.env),
       ([key, value]) => [key, value.value]
     );
