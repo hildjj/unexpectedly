@@ -1,12 +1,21 @@
 import {$} from 'zx';
 import assert from 'node:assert';
 import os from 'node:os';
+import semver from 'semver';
 
 describe('CLI', () => {
-  it('handles no args', async() => {
-    const {exitCode, stdout} = await $`./bin/unexpectedly.js`;
+  // eslint-disable-next-line func-names
+  it('handles no args', async function() {
+    if (!semver.satisfies(process.version, '>=20.8')) {
+      // eslint-disable-next-line no-invalid-this
+      this.skip();
+      return;
+    }
+
+    // Runs all tests in ./tests/
+    const {exitCode, stdout} = await $`./bin/unexpectedly.js`.quiet();
     assert.equal(exitCode, 0);
-    assert.equal(stdout, '');
+    assert.match(stdout, /0xcdcccc3dcdcc4c3e/);
   });
 
   it('handles invalid inputs', async() => {
@@ -16,7 +25,14 @@ describe('CLI', () => {
     assert.match(stderr, /ENOENT/);
   });
 
-  it('handles failing test', async() => {
+  // eslint-disable-next-line func-names
+  it('handles failing test', async function() {
+    if (!semver.satisfies(process.version, '>=20.8')) {
+      // eslint-disable-next-line no-invalid-this
+      this.skip();
+      return;
+    }
+
     const {exitCode, stdout, stderr} = await $`./bin/unexpectedly.js test/bad`.quiet().nothrow();
     assert.equal(exitCode, 2);
     assert.match(stdout, /ERR_ASSERTION/);
@@ -32,7 +48,7 @@ describe('CLI', () => {
 
   it('handles invalid package.json files', async() => {
     const {exitCode} = await $`./bin/unexpectedly.js test/pkg_bad`.quiet().nothrow();
-    assert.equal(exitCode, 0);
+    assert.equal(exitCode, 2);
   });
 
   it('handles invalid exports', async() => {

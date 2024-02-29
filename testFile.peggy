@@ -2,15 +2,12 @@
 import { mapObj } from './utils.js'
 }}
 
-
+{
+  let vars = {};
+}
 start
   = all:(WS @line? _)|.., EOL| {
-    const vars = mapObj(all.filter(t => t && t.hasOwnProperty('name')),
-      ({name, ...rest}) => [name, rest])
-    return {
-      tests: all.filter(t => t && t.hasOwnProperty('expected')),
-      vars
-    }
+    return all.filter(t => t && t.hasOwnProperty('expected'));
   }
 
 line
@@ -20,10 +17,20 @@ line
   / '' // hack
 
 var
-  = '#!' env:"!"? _ name:chunk _ ':' _ value:val _ {
-    value.name = name;
+  = '#!' env:"!"? _ name:chunk _ ':' _ value:(@val _)? {
+    if (!value) {
+      const start = location().start;
+      value = {
+        value: undefined,
+        line: start.line,
+        column: start.column,
+      }
+    }
     value.env = Boolean(env);
-    return value;
+    vars = {
+      ...vars,
+      [name]: value
+    }
   }
 
 val
@@ -35,7 +42,7 @@ val
 test
   = expected:results inputs:(LWS @chunk)* comment? {
     const start = location().start;
-    return { expected, inputs, line: start.line, column: start.column }
+    return { expected, inputs, vars, line: start.line, column: start.column }
   }
 
 results
@@ -87,7 +94,7 @@ qchar "other quoted characters, as needed"
   / '\\ ' { return ' ' }
 
 comment
-  = WS "#" [^\r\n]* { return undefined }
+  = WS "#" !"!" [^\r\n]* { return undefined }
 
 _ "optional whitespace"
   = [ \t]* { return undefined }

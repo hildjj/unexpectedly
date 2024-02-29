@@ -7,6 +7,7 @@ module.exports = {
     'node_modules/',
     '*.peg.js',
     'test/pkg_bad',
+    'vendor/',
   ],
   parserOptions: {
     ecmaVersion: 13,

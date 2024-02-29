@@ -11,13 +11,20 @@ npm install -g unexpectedly
 ## Usage
 
 ```
-unexpectedly [--defaultScript jsPattern] <...file|directory>
-  jsPattern (default: "../$<base>.js"): find the JS file relative to
-    the .tests file, replacing `$<base>` with the basename of the test file.
-    This may be specified multiple times, and modifies all files/directories
-    after.
-  file: a file that contains tests
-  directory (default: "."): a directory containing ".tests" files
+Usage: unexpectedly [options] [...file]
+
+Arguments:
+  ...file                           Files or directories to test (default:
+                                    "./test/")
+
+Options:
+  -V, --version                     output the version number
+  -d,--defaultScript <replacement>  Find the script from the file name.
+                                    Replace `$<base>` with the basename of the
+                                    file. (default: "../$<base>.js")
+  -f,--function <functionName>      Use this function for testing in the
+                                    associated script (default: "test")
+  -h, --help                        display help for command
 ```
 
 ## Example
@@ -63,8 +70,10 @@ unexpectedly tests/
 ```js
 import {suite} from 'unexpectedly';
 
-// returns a Promise
-suite(directoryOrFile, jsPattern).catch(console.error)
+await suite(directoryOrFile, {
+  defaultScript: '../$<base>.js',
+  function: 'test',
+}).catch(console.error)
 ```
 
 ## Test language
@@ -101,6 +110,9 @@ Special globals include:
    instead of the default
  - "timeout": If any test in the file takes longer than this (in ms),
    it fails.  Default: 2000
+ - "peggy": Treat the input as a compiled peggy grammar; look for a "parse"
+   function in the input script, provide better errors, and use the value
+   of the peggy global (if any) as the startRule.
 
 Environment variables can be set for the test code with `#!! name: value`.
 
