@@ -4,7 +4,14 @@ import os from 'node:os';
 import semver from 'semver';
 
 describe('CLI', () => {
-  it('handles no args', async() => {
+  // eslint-disable-next-line func-names
+  it('handles no args', async function() {
+    if (!semver.satisfies(process.version, '>=20.8')) {
+      // eslint-disable-next-line no-invalid-this
+      this.skip();
+      return;
+    }
+
     // Runs all tests in ./tests/
     const {exitCode, stdout} = await $`./bin/unexpectedly.js`.quiet();
     assert.equal(exitCode, 0);

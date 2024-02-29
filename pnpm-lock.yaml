@@ -14,6 +14,9 @@ dependencies:
   mocha:
     specifier: ^10.3.0
     version: 10.3.0
+  semver:
+    specifier: 7.6.0
+    version: 7.6.0
 
 devDependencies:
   '@cto.af/eslint-config':
@@ -34,9 +37,6 @@ devDependencies:
   rimraf:
     specifier: 5.0.5
     version: 5.0.5
-  semver:
-    specifier: 7.6.0
-    version: 7.6.0
   zx:
     specifier: 7.2.3
     version: 7.2.3

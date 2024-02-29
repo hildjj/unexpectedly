@@ -1,6 +1,6 @@
+import {Runner, SKIPPED} from './runner.js';
 import {hexlify, mapObj} from './utils.js';
 import Mocha from 'mocha';
-import {Runner} from './runner.js';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import {parse} from './testFile.peg.js';
@@ -12,6 +12,9 @@ async function coerce(actual, pt, runner) {
   const {expected} = pt;
   if (typeof actual === 'string') {
     return [actual, expected];
+  }
+  if (actual === SKIPPED) {
+    return [SKIPPED, SKIPPED];
   }
   if (actual && (typeof actual === 'object') && actual.constructor) {
     if (/^0x/.test(expected)) {
@@ -130,6 +133,8 @@ export async function suite(target = '.', options = {}) {
         Object.entries(pt.vars).filter(([k, v]) => v.env),
         ([key, value]) => [key, value.value]
       );
+      opts.silent18 = Boolean(options.silent18);
+
       const runner = new Runner(opts);
 
       const firstLine = (pt.expected === EXCEPTION) ? `! ${pt.inputs[0]}` : pt.expected.split(/\n/)[0];
@@ -142,6 +147,10 @@ export async function suite(target = '.', options = {}) {
             __column: pt.column,
             __offset: pt.offset,
           }, ...pt.inputs);
+          if (actual === SKIPPED) {
+            t.skip('Node 20.8 required');
+            return;
+          }
         } catch (e) {
           if (pt.expected !== EXCEPTION) {
             throw e;
@@ -151,6 +160,7 @@ export async function suite(target = '.', options = {}) {
         assert.notStrictEqual(pt.expected, EXCEPTION);
         assert.deepEqual.apply(null, await coerce(actual, pt, runner));
       });
+
       msuite.addTest(t);
     }
   }
