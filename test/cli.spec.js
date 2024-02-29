@@ -5,9 +5,10 @@ import semver from 'semver';
 
 describe('CLI', () => {
   it('handles no args', async() => {
-    const {exitCode, stdout} = await $`./bin/unexpectedly.js`;
+    // Runs all tests in ./tests/
+    const {exitCode, stdout} = await $`./bin/unexpectedly.js`.quiet();
     assert.equal(exitCode, 0);
-    assert.equal(stdout, '');
+    assert.match(stdout, /0xcdcccc3dcdcc4c3e/);
   });
 
   it('handles invalid inputs', async() => {

@@ -5,7 +5,6 @@ import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import {parse} from './testFile.peg.js';
 import path from 'node:path';
-import util from 'node:util';
 
 const EXCEPTION = Symbol('EXCEPTION');
 
@@ -44,17 +43,29 @@ async function coerce(actual, pt, runner) {
 }
 
 /**
+ * @typedef {object} SuiteOptions
+ * @property {string} [defaultScript='../$<base>.js'] Find the script from the
+ *   file name.  Replace `$<base>` with the basename of the file.  For
+ *   example, "foo.test" will use "../foo.js" by default.
+ * @property {string} [function='test'] Use this function for testing in the
+ *   associated script.
+ */
+
+/**
  * Run a test suite from a file or directory.
  *
  * @param {string} [target='.'] The file or directory to read.  If a
  *   directory, reads all files ending in `.tests`.
- * @param {string} [defaultScript='../$<base>.js'] Find the script from the
- *   file name.  Replace $1 with the basename of the file.  For example,
- *   "foo.test" will use "../foo.js" by default.
+ * @param {SuiteOptions} [options={}] Options for processing the suite.
  * @returns {Promise<number>} Promise fulfills on completion, with number of
  *   test failures.
  */
-export async function suite(target = '.', defaultScript = '../$<base>.js') {
+export async function suite(target = '.', options = {}) {
+  options = {
+    defaultScript: '../$<base>.js',
+    function: 'test',
+    ...options,
+  };
   let dir = path.resolve(target);
   let files = [dir];
   const mocha = new Mocha();
@@ -91,34 +102,37 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
       throw er;
     }
 
-    const opts = {};
-    let text = '';
-    if (parsed.vars.inline) {
-      opts.filename = f;
-      text = parsed.vars.inline.value;
-      opts.lineOffset = parsed.vars.inline.line - 1;
-      opts.columnOffset = parsed.vars.inline.column;
-    } else {
-      opts.filename = parsed.vars.script ?
-        path.resolve(dir, parsed.vars.script.value) :
-        path.resolve(dir, f.replace(/(?<base>[^./]*)\.tests?$/, defaultScript));
-      text = await fs.readFile(opts.filename, 'utf8');
-    }
-    if (parsed.vars.timeout) {
-      msuite.timeout(parseInt(parsed.vars.timeout.value, 10));
-    }
-    opts.context = mapObj(
-      Object.entries(parsed.vars).filter(([k, v]) => !v.env),
-      ([key, value]) => [key, value.value]
-    );
-    opts.env = mapObj(
-      Object.entries(parsed.vars).filter(([k, v]) => v.env),
-      ([key, value]) => [key, value.value]
-    );
-    const runner = new Runner(opts);
+    for (const pt of parsed) {
+      const opts = {
+        testFunction: options.function,
+      };
+      let text = '';
+      if (pt.vars.inline) {
+        opts.filename = f;
+        text = pt.vars.inline.value;
+        opts.lineOffset = pt.vars.inline.line - 1;
+        opts.columnOffset = pt.vars.inline.column;
+      } else {
+        opts.filename = pt.vars.script ?
+          path.resolve(dir, pt.vars.script.value) :
+          path.resolve(dir,
+            f.replace(/(?<base>[^\\/]*)\.tests?$/, options.defaultScript));
+        text = await fs.readFile(opts.filename, 'utf8');
+      }
+      if (pt.vars.timeout) {
+        msuite.timeout(parseInt(pt.vars.timeout.value, 10));
+      }
+      opts.context = mapObj(
+        Object.entries(pt.vars).filter(([k, v]) => !v.env),
+        ([key, value]) => [key, value.value]
+      );
+      opts.env = mapObj(
+        Object.entries(pt.vars).filter(([k, v]) => v.env),
+        ([key, value]) => [key, value.value]
+      );
+      const runner = new Runner(opts);
 
-    for (const pt of parsed.tests) {
-      const firstLine = (pt.expected === EXCEPTION) ? '!' : pt.expected.split(/\n/)[0];
+      const firstLine = (pt.expected === EXCEPTION) ? `! ${pt.inputs[0]}` : pt.expected.split(/\n/)[0];
       const t = new Mocha.Test(`line ${pt.line}: ${firstLine || '""'}`, async() => {
         let actual = null;
         try {
@@ -126,6 +140,7 @@ export async function suite(target = '.', defaultScript = '../$<base>.js') {
             __expected: pt.expected,
             __line: pt.line,
             __column: pt.column,
+            __offset: pt.offset,
           }, ...pt.inputs);
         } catch (e) {
           if (pt.expected !== EXCEPTION) {
