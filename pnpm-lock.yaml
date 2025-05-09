@@ -33,6 +33,9 @@ importers:
       eslint-plugin-mocha:
         specifier: 11.0.0
         version: 11.0.0(eslint@9.26.0)
+      package-extract:
+        specifier: 3.1.0
+        version: 3.1.0
       peggy:
         specifier: ^5.0.2
         version: 5.0.2
@@ -862,6 +865,11 @@ packages:
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
+
+  package-extract@3.1.0:
+    resolution: {integrity: sha512-QoyK/7ePGWaVXHqy6ZRqos/MKa0PCEsLX4pouP3JB5+0vRnNyIc0LaUh6ZqMly4ZL96iLHChFkVRAlcORPgw0w==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
@@ -2099,6 +2107,11 @@ snapshots:
   p-locate@5.0.0:
     dependencies:
       p-limit: 3.1.0
+
+  package-extract@3.1.0:
+    dependencies:
+      commander: 13.1.0
+      semver: 7.7.1
 
   package-json-from-dist@1.0.1: {}
 

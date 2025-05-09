@@ -1,19 +1,14 @@
 #!/usr/bin/env -S node --experimental-vm-modules --no-warnings
 import {Command} from 'commander';
-import fs from 'node:fs/promises';
 import {suite} from '../index.js';
+import {version} from '../version.js';
 
 let failures = 0;
 
 async function main() {
-  const pkg = JSON.parse(await fs.readFile(
-    new URL('../package.json', import.meta.url),
-    'utf-8'
-  ));
-
   const program = new Command();
   const opts = program
-    .version(pkg.version)
+    .version(version)
     .argument('[file...]', 'Files or directories to test', './test/')
     .option('-d,--defaultScript <replacement>', 'Find the script from the file name.  Replace `$<base>` with the basename of the file.', '../$<base>.js')
     .option('-f,--function <functionName>', 'Use this function for testing in the associated script', 'test')
