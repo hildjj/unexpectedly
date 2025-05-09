@@ -1,14 +1,11 @@
 import GrammarLocation from './vendor/peggy/grammar-location.cjs';
 import fromMem from '@peggyjs/from-mem';
 import path from 'node:path';
-import semver from 'semver';
 
 const PREFIX_MJS = 'export default ';
 const PREFIX_CJS = 'module.exports = ';
 const PREFIX_MJS_LEN = PREFIX_MJS.length;
 const PREFIX_CJS_LEN = PREFIX_CJS.length;
-
-const is20 = semver.satisfies(process.version, '>=20.8');
 
 export const SKIPPED = Symbol('SKIPPED');
 

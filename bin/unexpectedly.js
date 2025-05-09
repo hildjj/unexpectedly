@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --experimental-vm-modules --no-warnings
-import {Command, Option} from 'commander';
+import {Command} from 'commander';
 import fs from 'node:fs/promises';
 import {suite} from '../index.js';
 
