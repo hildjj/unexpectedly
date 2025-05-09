@@ -1,17 +1,9 @@
 import {$} from 'zx';
 import assert from 'node:assert';
 import os from 'node:os';
-import semver from 'semver';
 
 describe('CLI', () => {
-  // eslint-disable-next-line func-names
-  it('handles no args', async function() {
-    if (!semver.satisfies(process.version, '>=20.8')) {
-      // eslint-disable-next-line no-invalid-this
-      this.skip();
-      return;
-    }
-
+  it('handles no args', async() => {
     // Runs all tests in ./tests/
     const {exitCode, stdout} = await $`./bin/unexpectedly.js`.quiet();
     assert.equal(exitCode, 0);
@@ -25,14 +17,7 @@ describe('CLI', () => {
     assert.match(stderr, /ENOENT/);
   });
 
-  // eslint-disable-next-line func-names
-  it('handles failing test', async function() {
-    if (!semver.satisfies(process.version, '>=20.8')) {
-      // eslint-disable-next-line no-invalid-this
-      this.skip();
-      return;
-    }
-
+  it('handles failing test', async() => {
     const {exitCode, stdout, stderr} = await $`./bin/unexpectedly.js test/bad`.quiet().nothrow();
     assert.equal(exitCode, 2);
     assert.match(stdout, /ERR_ASSERTION/);
@@ -61,13 +46,13 @@ describe('CLI', () => {
     assert.equal(exitCode, 1);
   });
 
-  if (os.platform() !== 'win32') {
-    it('detects odd file types', async() => {
+  it('detects odd file types', async() => {
+    if (os.platform() !== 'win32') {
       const fifoName = '__testFIFO__';
       await $`mkfifo ${fifoName}`.quiet();
       const {exitCode} = await $`./bin/unexpectedly.js ${fifoName}`.quiet().nothrow();
       assert.equal(exitCode, 1);
       await $`rm ${fifoName}`.quiet();
-    });
-  }
+    }
+  });
 });

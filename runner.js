@@ -1,14 +1,11 @@
 import GrammarLocation from './vendor/peggy/grammar-location.cjs';
 import fromMem from '@peggyjs/from-mem';
 import path from 'node:path';
-import semver from 'semver';
 
 const PREFIX_MJS = 'export default ';
 const PREFIX_CJS = 'module.exports = ';
 const PREFIX_MJS_LEN = PREFIX_MJS.length;
 const PREFIX_CJS_LEN = PREFIX_CJS.length;
-
-const is20 = semver.satisfies(process.version, '>=20.8');
 
 export const SKIPPED = Symbol('SKIPPED');
 
@@ -28,7 +25,6 @@ export class Runner {
   #env;
   #filename;
   #lineOffset;
-  #silent18;
   #testFunction;
   #type;
   #skipped;
@@ -39,7 +35,6 @@ export class Runner {
     columnOffset = 0,
     context = {},
     env = {},
-    silent18 = false,
     testFunction = 'test',
     type = 'guess',
   } = {}) {
@@ -52,7 +47,6 @@ export class Runner {
     this.#context = context;
     this.#columnOffset = columnOffset;
     this.#lineOffset = lineOffset;
-    this.#silent18 = silent18;
     this.#skipped = null;
     this.#type = type;
     this.#testFunction = testFunction;
@@ -69,11 +63,6 @@ export class Runner {
 
     let columnOffset = this.#columnOffset;
     if (format === 'es') {
-      if (this.#silent18 && !is20) {
-        this.#skipped = true;
-        return SKIPPED;
-      }
-
       if (text.indexOf('export') === -1) {
         text = PREFIX_MJS + text; // Most common case
         columnOffset -= PREFIX_MJS_LEN;

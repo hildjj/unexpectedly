@@ -116,24 +116,33 @@ export async function suite(target = '.', options = {}) {
         opts.lineOffset = pt.vars.inline.line - 1;
         opts.columnOffset = pt.vars.inline.column;
       } else {
-        opts.filename = pt.vars.script ?
-          path.resolve(dir, pt.vars.script.value) :
-          path.resolve(dir,
-            f.replace(/(?<base>[^\\/]*)\.tests?$/, options.defaultScript));
+        if (pt.vars.script) {
+          opts.filename = path.resolve(dir, pt.vars.script.value);
+        } else {
+          // Avoid a previous ReDOS regexp.
+          const p = path.parse(f);
+          if (/^\.tests?$/.test(p.ext)) {
+            delete p.base;
+            delete p.ext;
+            p.name = p.name.replace(/^(?<base>.*)$/, options.defaultScript);
+            opts.filename = path.resolve(dir, path.format(p));
+          } else {
+            opts.filename = path.resolve(dir, f);
+          }
+        }
         text = await fs.readFile(opts.filename, 'utf8');
       }
       if (pt.vars.timeout) {
         msuite.timeout(parseInt(pt.vars.timeout.value, 10));
       }
       opts.context = mapObj(
-        Object.entries(pt.vars).filter(([k, v]) => !v.env),
+        Object.entries(pt.vars).filter(([_k, v]) => !v.env),
         ([key, value]) => [key, value.value]
       );
       opts.env = mapObj(
-        Object.entries(pt.vars).filter(([k, v]) => v.env),
+        Object.entries(pt.vars).filter(([_k, v]) => v.env),
         ([key, value]) => [key, value.value]
       );
-      opts.silent18 = Boolean(options.silent18);
 
       const runner = new Runner(opts);
 
@@ -165,7 +174,7 @@ export async function suite(target = '.', options = {}) {
     }
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     mocha.run(resolve);
   });
 }

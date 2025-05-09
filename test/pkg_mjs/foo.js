@@ -1,5 +1,5 @@
 import bar from './bar.js';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 /**
  * Function that calls an imported async function.
