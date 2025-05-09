@@ -1,6 +1,6 @@
 // One of each kind of import, for testing.
 import {fileURLToPath} from 'node:url';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 const path = await import('node:path');
 
 /**

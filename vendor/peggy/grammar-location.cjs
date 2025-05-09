@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * When used as a grammarSource, allows grammars embedded in larger files to
@@ -40,9 +40,9 @@ class GrammarLocation {
   offset(loc) {
     return {
       line: loc.line + this.start.line - 1,
-      column: (loc.line === 1)
-        ? loc.column + this.start.column - 1
-        : loc.column,
+      column: (loc.line === 1) ?
+        loc.column + this.start.column - 1 :
+        loc.column,
       offset: loc.offset + this.start.offset,
     };
   }
@@ -56,7 +56,7 @@ class GrammarLocation {
    *   original start.
    */
   static offsetStart(range) {
-    if (range.source && (typeof range.source.offset === "function")) {
+    if (range.source && (typeof range.source.offset === 'function')) {
       return range.source.offset(range.start);
     }
     return range.start;
@@ -71,7 +71,7 @@ class GrammarLocation {
    *   original end.
    */
   static offsetEnd(range) {
-    if (range.source && (typeof range.source.offset === "function")) {
+    if (range.source && (typeof range.source.offset === 'function')) {
       return range.source.offset(range.end);
     }
     return range.end;

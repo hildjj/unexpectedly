@@ -61,13 +61,13 @@ describe('CLI', () => {
     assert.equal(exitCode, 1);
   });
 
-  if (os.platform() !== 'win32') {
-    it('detects odd file types', async() => {
+  it('detects odd file types', async() => {
+    if (os.platform() !== 'win32') {
       const fifoName = '__testFIFO__';
       await $`mkfifo ${fifoName}`.quiet();
       const {exitCode} = await $`./bin/unexpectedly.js ${fifoName}`.quiet().nothrow();
       assert.equal(exitCode, 1);
       await $`rm ${fifoName}`.quiet();
-    });
-  }
+    }
+  });
 });
