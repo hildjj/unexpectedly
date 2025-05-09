@@ -1,6 +1,6 @@
 {
   "name": "unexpectedly",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Keep a bunch of test cases in a file, with their expected results",
   "main": "index.js",
   "type": "module",
