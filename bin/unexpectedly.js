@@ -1,6 +1,4 @@
 #!/usr/bin/env -S node --experimental-vm-modules --no-warnings
-/* eslint-disable no-console */
-
 import {Command, Option} from 'commander';
 import fs from 'node:fs/promises';
 import {suite} from '../index.js';
@@ -16,10 +14,9 @@ async function main() {
   const program = new Command();
   const opts = program
     .version(pkg.version)
-    .argument('[...file]', 'Files or directories to test', './test/')
+    .argument('[file...]', 'Files or directories to test', './test/')
     .option('-d,--defaultScript <replacement>', 'Find the script from the file name.  Replace `$<base>` with the basename of the file.', '../$<base>.js')
     .option('-f,--function <functionName>', 'Use this function for testing in the associated script', 'test')
-    .addOption(new Option('-s,--silent18', 'Silently skip mjs tests on node 18.').hideHelp())
     .parse()
     .opts();
 

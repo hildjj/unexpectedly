@@ -8,7 +8,7 @@
     "build": "peggy -o testFile.peg.js --format es testFile.peggy",
     "pretest": "npm run build",
     "test": "c8 npm run runtests",
-    "runtests": "mocha && bin/unexpectedly.js -s test test/pkg_mjs/test test/pkg_cjs/test",
+    "runtests": "mocha && bin/unexpectedly.js test test/pkg_mjs/test test/pkg_cjs/test",
     "lint": "eslint .",
     "ci": "npm run lint && npm run test",
     "clean": "rimraf coverage testFile.peg.js"

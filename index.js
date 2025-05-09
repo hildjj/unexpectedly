@@ -143,7 +143,6 @@ export async function suite(target = '.', options = {}) {
         Object.entries(pt.vars).filter(([_k, v]) => v.env),
         ([key, value]) => [key, value.value]
       );
-      opts.silent18 = Boolean(options.silent18);
 
       const runner = new Runner(opts);
 

@@ -28,7 +28,6 @@ export class Runner {
   #env;
   #filename;
   #lineOffset;
-  #silent18;
   #testFunction;
   #type;
   #skipped;
@@ -39,7 +38,6 @@ export class Runner {
     columnOffset = 0,
     context = {},
     env = {},
-    silent18 = false,
     testFunction = 'test',
     type = 'guess',
   } = {}) {
@@ -52,7 +50,6 @@ export class Runner {
     this.#context = context;
     this.#columnOffset = columnOffset;
     this.#lineOffset = lineOffset;
-    this.#silent18 = silent18;
     this.#skipped = null;
     this.#type = type;
     this.#testFunction = testFunction;
@@ -69,11 +66,6 @@ export class Runner {
 
     let columnOffset = this.#columnOffset;
     if (format === 'es') {
-      if (this.#silent18 && !is20) {
-        this.#skipped = true;
-        return SKIPPED;
-      }
-
       if (text.indexOf('export') === -1) {
         text = PREFIX_MJS + text; // Most common case
         columnOffset -= PREFIX_MJS_LEN;

@@ -15,4 +15,12 @@ export default [
   ...base,
   ...mod,
   ...mocha,
+  {
+    files: [
+      'bin/**.js',
+    ],
+    rules: {
+      'no-console': 'off',
+    },
+  },
 ];
