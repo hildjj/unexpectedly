@@ -11,7 +11,8 @@
     "runtests": "mocha && bin/unexpectedly.js test test/pkg_mjs/test test/pkg_cjs/test",
     "lint": "eslint .",
     "ci": "npm run lint && npm run test",
-    "clean": "rimraf coverage testFile.peg.js"
+    "clean": "rimraf coverage testFile.peg.js",
+    "version": "package-extract -s -o version.js && git add version.js"
   },
   "bin": {
     "unexpectedly": "bin/unexpectedly.js"
@@ -42,6 +43,7 @@
     "eslint": "^9.26.0",
     "eslint-plugin-jsdoc": "50.6.11",
     "eslint-plugin-mocha": "11.0.0",
+    "package-extract": "3.1.0",
     "peggy": "^5.0.2",
     "rimraf": "6.0.1",
     "zx": "8.5.3"
