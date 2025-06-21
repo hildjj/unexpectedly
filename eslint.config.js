@@ -17,10 +17,10 @@ export default [
   ...mocha,
   {
     files: [
-      'bin/**.js',
+      'test/**/*.js',
     ],
     rules: {
-      'no-console': 'off',
+      'n/no-top-level-await': 'off',
     },
   },
 ];
