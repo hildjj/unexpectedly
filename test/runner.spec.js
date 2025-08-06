@@ -5,7 +5,7 @@ import url from 'node:url';
 const __filename = url.fileURLToPath(import.meta.url);
 
 describe('runner', () => {
-  it('Handles root directories', async() => {
+  it('Handles root directories', async () => {
     const r = new Runner({filename: '/'});
     const res = await r.run('module.exports = () => 4');
     assert.equal(res, 4);
@@ -15,7 +15,7 @@ describe('runner', () => {
     assert.throws(() => new Runner());
   });
 
-  it('takes an explicit format', async() => {
+  it('takes an explicit format', async () => {
     const r = new Runner({
       filename: __filename,
       type: 'cjs',
