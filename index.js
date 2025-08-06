@@ -147,7 +147,7 @@ export async function suite(target = '.', options = {}) {
       const runner = new Runner(opts);
 
       const firstLine = (pt.expected === EXCEPTION) ? `! ${pt.inputs[0]}` : pt.expected.split(/\n/)[0];
-      const t = new Mocha.Test(`line ${pt.line}: ${firstLine || '""'}`, async() => {
+      const t = new Mocha.Test(`line ${pt.line}: ${firstLine || '""'}`, async () => {
         let actual = null;
         try {
           actual = await runner.run(text, {
