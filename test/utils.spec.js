@@ -1,5 +1,5 @@
 import * as utils from '../utils.js';
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 
 describe('utils', () => {
   it('mapObj', () => {

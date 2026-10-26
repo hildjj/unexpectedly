@@ -1,5 +1,5 @@
 import {Runner} from '../runner.js';
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import url from 'node:url';
 
 const __filename = url.fileURLToPath(import.meta.url);

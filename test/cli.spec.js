@@ -1,5 +1,5 @@
 import {$} from 'zx';
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import os from 'node:os';
 
 describe('CLI', () => {
