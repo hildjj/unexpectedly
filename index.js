@@ -1,6 +1,7 @@
 import {Runner, SKIPPED} from './runner.js';
 import {hexlify, mapObj} from './utils.js';
 import Mocha from 'mocha';
+// eslint-disable-next-line n/prefer-import/assert-strict
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import {parse} from './testFile.peg.js';
